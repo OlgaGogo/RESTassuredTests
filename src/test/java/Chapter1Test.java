@@ -1,6 +1,7 @@
 import static io.restassured.RestAssured.*;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
 
+import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.Assert;
 import org.junit.Test;
@@ -30,7 +31,8 @@ public class Chapter1Test {
 
         given().get("http://api.zippopotam.us/us/90210").
                 then().
-                statusCode(200);
+                assertThat().
+                contentType(ContentType.JSON);
     }
 
     @Test
@@ -40,6 +42,64 @@ public class Chapter1Test {
                 when().
                 get("http://api.zippopotam.us/us/90210").
                 then().assertThat().body("places[0].'place name'", equalTo("Beverly Hills"));
+    }
+
+    @Test
+    public void test4(){
+
+        given().
+                log().all().
+                when().
+                    get("http://api.zippopotam.us/us/90210").
+                then().
+                    log().body();
+    }
+
+    @Test
+    public void requestUsZipCode90210_checkPlaceNameInResponseBody_expectBeverlyHills(){
+
+        given().
+                when().
+                    get("http://api.zippopotam.us/us/90210").
+                then().
+                    assertThat().
+                    body("places[0].'place name'", equalTo("Beverly Hills"));
+    }
+
+    @Test
+    public void requestUsZipCode90210_checkStateNameInResponseBody_expectCalifornia(){
+
+        given().
+                when().
+                    get("http://api.zippopotam.us/us/90210").
+                then().
+                    assertThat().
+                    body("places[0].state", equalTo("California"));
+
+    }
+
+    @Test
+    public void requestUsZipCode90210_checkListOfPlaceNamesInResponseBody_expectContainsBeverlyHills(){
+
+        given().
+                when().
+                    get("http://api.zippopotam.us/us/90210").
+                then().
+                    assertThat().
+                    body("places.'place name'", not(hasItem("Toronto")));
+
+    }
+
+    @Test
+    public void requestUsZipCode90210_checkNumberOfPlaceNamesInResponseBody_expectOne(){
+
+        given().
+                when().
+                    get("http://api.zippopotam.us/us/90210").
+                then().
+                assertThat().
+                    body("places.'place name'", hasSize(1));
+
     }
 
 }
